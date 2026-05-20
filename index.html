@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园打卡指南 | Campus Check-in Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --primary-dark: #357ABD;
+            --secondary: #F5A623;
+            --bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --text-sub: #7F8C8D;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            transition: var(--transition);
+            background: transparent;
+        }
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 12px 0;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .navbar.scrolled .logo { color: var(--primary); }
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: var(--secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+        .navbar.scrolled .nav-links a { color: var(--text-main); }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--secondary);
+            transition: var(--transition);
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: var(--secondary); }
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .menu-toggle span {
+            width: 24px; height: 2px;
+            background: white;
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+        .navbar.scrolled .menu-toggle span { background: var(--text-main); }
+        .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .menu-toggle.active span:nth-child(2) { opacity: 0; }
+        .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+        .hero {
+            height: 100vh;
+            min-height: 600px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://picsum.photos/seed/campus/1920/1080') center/cover;
+            opacity: 0.3;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 0 24px;
+            max-width: 800px;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .hero h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+        }
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+        }
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245,166,35,0.5);
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            animation: bounce 2s infinite;
+        }
+        .scroll-indicator svg { width: 24px; height: 24px; }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .section-header h2 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2.2rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+        .section-header p {
+            color: var(--text-sub);
+            font-size: 1rem;
+        }
+        .spots-section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .spots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        .spot-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .spot-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .spot-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px var(--shadow-hover);
+        }
+        .spot-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        .spot-card:hover .spot-image { transform: scale(1.05); }
+        .spot-image-wrapper {
+            overflow: hidden;
+            position: relative;
+        }
+        .spot-rating {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: rgba(255,255,255,0.95);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .spot-content { padding: 24px; }
+        .spot-content h3 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .spot-desc {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .spot-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .feature-tag {
+            padding: 4px 10px;
+            background: rgba(74,144,226,0.1);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .spot-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .meta-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+        .meta-item svg {
+            width: 16px; height: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            color: var(--primary);
+        }
+        .meta-label {
+            font-weight: 600;
+            color: var(--text-main);
+            flex-shrink: 0;
+        }
+        .footer {
+            background: var(--text-main);
+            color: rgba(255,255,255,0.8);
+            padding: 48px 24px 24px;
+            text-align: center;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer h3 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .footer p {
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .footer-links a:hover { color: var(--secondary); }
+        .footer-bottom {
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 32px; right: 32px;
+            width: 48px; height: 48px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(74,144,226,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+            z-index: 999;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .back-to-top:hover {
+            background: var(--primary-dark);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(74,144,226,0.5);
+        }
+        .back-to-top svg { width: 20px; height: 20px; }
+        @media (max-width: 1024px) {
+            .spots-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .nav-links {
+                position: fixed;
+                top: 0; right: -100%;
+                width: 70%;
+                max-width: 300px;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                padding: 80px 32px 32px;
+                gap: 24px;
+                transition: var(--transition);
+                box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a {
+                color: var(--text-main) !important;
+                font-size: 1.1rem;
+            }
+            .menu-toggle { display: flex; }
+            .spots-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .spots-section { padding: 60px 16px; }
+            .section-header h2 { font-size: 1.8rem; }
+            .back-to-top {
+                bottom: 20px; right: 20px;
+                width: 44px; height: 44px;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero-badge {
+                font-size: 0.75rem;
+                padding: 6px 14px;
+            }
+            .spot-content { padding: 20px; }
+            .spot-image { height: 180px; }
+        }
+        .spot-card:nth-child(1) { transition-delay: 0.05s; }
+        .spot-card:nth-child(2) { transition-delay: 0.1s; }
+        .spot-card:nth-child(3) { transition-delay: 0.15s; }
+        .spot-card:nth-child(4) { transition-delay: 0.2s; }
+        .spot-card:nth-child(5) { transition-delay: 0.25s; }
+        .spot-card:nth-child(6) { transition-delay: 0.3s; }
+        .spot-card:nth-child(7) { transition-delay: 0.35s; }
+        .spot-card:nth-child(8) { transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">📍</span>
+                <span>校园打卡指南</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#spots">打卡点</a></li>
+                <li><a href="#about">关于</a></li>
+            </ul>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">📸 探索校园最美角落</div>
+            <h1>校园打卡指南</h1>
+            <p>发现校园里的每一处风景，记录属于你的青春记忆。8个精选打卡点，带你领略不一样的校园之美。</p>
+            <a href="#spots" class="hero-cta">
+                开始探索
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <span>向下滚动</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+    <section class="spots-section" id="spots">
+        <div class="section-header">
+            <h2>精选打卡点</h2>
+            <p>8个校园必去圣地，每一个都值得你驻足留念</p>
+        </div>
+        <div class="spots-grid" id="spotsGrid"></div>
+    </section>
+    <footer class="footer" id="about">
+        <div class="footer-content">
+            <h3>校园打卡指南</h3>
+            <p>记录青春，发现美好。愿你在校园的每一个角落，都能找到属于自己的风景。</p>
+            <div class="footer-links">
+                <a href="#home">首页</a>
+                <a href="#spots">打卡点</a>
+                <a href="#">使用条款</a>
+                <a href="#">隐私政策</a>
+            </div>
+            <div class="footer-bottom">
+                <p> 校园打卡指南. All rights reserved. Made with ❤️ for students.</p>
+            </div>
+        </div>
+    </footer>
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </button>
+    <script>
+        const spots = [
+            {
+                id: 1,
+                name: '图书馆穹顶',
+                desc: '校园最具标志性的建筑，穹顶设计融合古典与现代，是毕业照必拍圣地',
+                features: ['欧式穹顶', '玻璃天窗', '旋转楼梯'],
+                rating: 5,
+                time: '日落前1小时（17:00-18:30）',
+                tip: '仰拍穹顶全貌，或站在旋转楼梯上拍剪影',
+                location: '校园中轴线上，正门进入直行200米',
+                image: 'https://picsum.photos/seed/library/800/600'
+            },
+            {
+                id: 2,
+                name: '樱花大道',
+                desc: '春季校园最浪漫的打卡地，数百株樱花沿主干道两侧盛开',
+                features: ['樱花隧道', '花瓣雨', '春日野餐'],
+                rating: 5,
+                time: '3月下旬-4月上旬，早晨7:00-9:00',
+                tip: '低角度仰拍花隧道，或带野餐垫拍氛围感照片',
+                location: '从东门到教学区的主干道',
+                image: 'https://picsum.photos/seed/cherry/800/600'
+            },
+            {
+                id: 3,
+                name: '老校门',
+                desc: '建校时期的原校门，承载几代学子的记忆',
+                features: ['历史建筑', '石刻校名', '怀旧氛围'],
+                rating: 4,
+                time: '全天皆宜，雨天更有复古韵味',
+                tip: '正面全景或透过门框拍景深效果',
+                location: '校园西南角，原校址入口处',
+                image: 'https://picsum.photos/seed/gate/800/600'
+            },
+            {
+                id: 4,
+                name: '湖畔长椅',
+                desc: '校园人工湖边的木质长椅，背景是湖心亭与垂柳',
+                features: ['湖景倒影', '垂柳依依', '静谧氛围'],
+                rating: 4,
+                time: '傍晚17:30-18:30，湖面倒映晚霞',
+                tip: '侧坐长椅拍剪影，或拍湖面倒影对称构图',
+                location: '图书馆北侧，沿湖步道中段',
+                image: 'https://picsum.photos/seed/lake/800/600'
+            },
+            {
+                id: 5,
+                name: '钟楼广场',
+                desc: '校园中心地标，整点报时的钟声回荡校园',
+                features: ['哥特式钟楼', '鸽群', '广场喷泉'],
+                rating: 5,
+                time: '整点报时刻，或夜晚亮灯后',
+                tip: '广角拍钟楼全貌，或蹲低角度拍鸽群环绕',
+                location: '校园几何中心，各主干道交汇点',
+                image: 'https://picsum.photos/seed/clocktower/800/600'
+            },
+            {
+                id: 6,
+                name: '涂鸦隧道',
+                desc: '连接教学区与宿舍区的地下隧道，两侧墙壁布满学生创作的涂鸦作品',
+                features: ['街头艺术', '学生创作', '色彩冲击'],
+                rating: 4,
+                time: '白天（隧道内光线较暗，需自然光）',
+                tip: '与涂鸦互动拍pose，或拍隧道纵深感',
+                location: '第三教学楼与西区宿舍之间',
+                image: 'https://picsum.photos/seed/graffiti/800/600'
+            },
+            {
+                id: 7,
+                name: '操场看台',
+                desc: '红色塑胶跑道旁的阶梯看台，青春校园剧的标配场景',
+                features: ['红色跑道', '阶梯线条', '青春感'],
+                rating: 3,
+                time: '黄昏18:00-19:00，看台被夕阳染成金色',
+                tip: '利用阶梯线条拍纵深感，或坐在看台边缘拍逆光',
+                location: '东区运动场北侧看台',
+                image: 'https://picsum.photos/seed/stadium/800/600'
+            },
+            {
+                id: 8,
+                name: '食堂二楼露台',
+                desc: '学生食堂二楼的露天就餐区，可俯瞰校园中轴线',
+                features: ['俯瞰视角', '校园全景', '生活气息'],
+                rating: 4,
+                time: '午餐后12:30-13:30',
+                tip: '拍校园中轴线全景，或以食物为前景拍窗外',
+                location: '第一食堂二楼南侧露台',
+                image: 'https://picsum.photos/seed/cafeteria/800/600'
+            }
+        ];
+        function renderCards() {
+            const grid = document.getElementById('spotsGrid');
+            grid.innerHTML = spots.map(spot => `
+                <article class="spot-card" data-id="${spot.id}">
+                    <div class="spot-image-wrapper">
+                        <img src="${spot.image}" alt="${spot.name}" class="spot-image" loading="lazy">
+                        <div class="spot-rating">
+                            <span>${'★'.repeat(spot.rating)}${'☆'.repeat(5 - spot.rating)}</span>
+                            <span>${spot.rating}星</span>
+                        </div>
+                    </div>
+                    <div class="spot-content">
+                        <h3>${spot.name}</h3>
+                        <p class="spot-desc">${spot.desc}</p>
+                        <div class="spot-features">
+                            ${spot.features.map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                        </div>
+                        <div class="spot-meta">
+                            <div class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span><span class="meta-label">推荐时间：</span>${spot.time}</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                    <circle cx="12" cy="13" r="4"/>
+                                </svg>
+                                <span><span class="meta-label">拍摄建议：</span>${spot.tip}</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                <span><span class="meta-label">位置：</span>${spot.location}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            document.querySelectorAll('.spot-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+        function initMobileMenu() {
+            const menuToggle = document.getElementById('menuToggle');
+            const navLinks = document.getElementById('navLinks');
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            });
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    menuToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+        function initBackToTop() {
+            const btn = document.getElementById('backToTop');
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 500) {
+                    btn.classList.add('visible');
+                } else {
+                    btn.classList.remove('visible');
+                }
+            });
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+            initScrollAnimations();
+            initNavbar();
+            initMobileMenu();
+            initBackToTop();
+        });
+    </script>
+</body>
+</html>
