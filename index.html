@@ -2,38 +2,90 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>校园打卡指南 | Campus Check-in Guide</title>
+    <!-- Google字体引入 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* ================================================
+           【UI设计师】设计系统 - CSS变量定义
+           设计思路：移动端优先，现代简洁风格，柔和渐变配色
+           ================================================ */
         :root {
+            /* 主色调 - 由UI设计师确定的品牌色 */
             --primary: #4A90E2;
             --primary-dark: #357ABD;
+            --primary-light: rgba(74, 144, 226, 0.1);
             --secondary: #F5A623;
+            --secondary-light: #FFD180;
+            
+            /* 背景与卡片 - 柔和的灰白色调 */
             --bg: #F8F9FA;
             --card-bg: #FFFFFF;
             --text-main: #2C3E50;
             --text-sub: #7F8C8D;
-            --shadow: rgba(0, 0, 0, 0.08);
-            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --text-muted: #95A5A6;
+            
+            /* 阴影与圆角 - 柔和的视觉层次 */
+            --shadow: rgba(0, 0, 0, 0.06);
+            --shadow-hover: rgba(0, 0, 0, 0.12);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
             --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+            --radius-full: 50px;
+            
+            /* 过渡动画 - 流畅的交互体验 */
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.2s ease;
+            
+            /* 分类标签颜色 - 由UI设计师定义的语义化配色 */
+            --cat-scenery: #27AE60;
+            --cat-building: #8E44AD;
+            --cat-landmark: #E74C3C;
+            --cat-art: #F39C12;
+            --cat-sports: #3498DB;
+            --cat-food: #E91E63;
+            
+            /* 移动端间距 */
+            --spacing-xs: 8px;
+            --spacing-sm: 12px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
         }
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
+
+        /* ================================================
+           【前端开发】基础重置与全局样式
+           ================================================ */
+        *, *::before, *::after { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        html { 
+            scroll-behavior: smooth; 
+            font-size: 14px;
+        }
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
+            min-height: 100vh;
         }
+
+        /* ================================================
+           【UI设计师】导航栏样式
+           设计要点：固定顶部，滚动时背景变化，移动端汉堡菜单
+           ================================================ */
         .navbar {
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1000;
-            padding: 16px 0;
+            padding: var(--spacing-md) 0;
             transition: var(--transition);
             background: transparent;
         }
@@ -41,12 +93,12 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            padding: 12px 0;
+            padding: var(--spacing-sm) 0;
         }
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 var(--spacing-md);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -59,14 +111,14 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--spacing-xs);
             transition: var(--transition);
         }
         .navbar.scrolled .logo { color: var(--primary); }
         .logo-icon {
             width: 32px; height: 32px;
             background: var(--secondary);
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -74,7 +126,7 @@
         }
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: var(--spacing-xl);
             list-style: none;
         }
         .nav-links a {
@@ -96,12 +148,15 @@
         }
         .nav-links a:hover::after { width: 100%; }
         .nav-links a:hover { color: var(--secondary); }
+        
+        /* 移动端菜单按钮 - 触摸友好尺寸 */
         .menu-toggle {
             display: none;
             flex-direction: column;
             gap: 5px;
             cursor: pointer;
             z-index: 1001;
+            padding: var(--spacing-sm);
         }
         .menu-toggle span {
             width: 24px; height: 2px;
@@ -113,9 +168,14 @@
         .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
         .menu-toggle.active span:nth-child(2) { opacity: 0; }
         .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* ================================================
+           【UI设计师】Hero区域样式
+           设计要点：全屏背景，渐变叠加，居中内容，移动端适配
+           ================================================ */
         .hero {
             height: 100vh;
-            min-height: 600px;
+            min-height: 560px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             position: relative;
             display: flex;
@@ -127,50 +187,56 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: url('https://picsum.photos/seed/campus/1920/1080') center/cover;
-            opacity: 0.3;
+            /* 【UI设计师】AI生成的Hero背景图 - 校园风景主题 */
+            background: url('https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20university%20campus%20landscape%20with%20modern%20buildings%20and%20green%20trees%2C%20students%20walking%2C%20warm%20sunlight%2C%20aerial%20view%2C%20%E9%9D%92%E6%98%A5%E6%B4%BB%E5%8A%9B%20%E6%A0%A1%E5%9B%AD%E5%85%AC%E9%A3%8E&image_size=landscape_16_9') center/cover;
+            opacity: 0.35;
         }
         .hero-content {
             position: relative;
             z-index: 2;
             text-align: center;
             color: white;
-            padding: 0 24px;
+            padding: 0 var(--spacing-md);
             max-width: 800px;
+            animation: fadeInUp 0.8s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .hero-badge {
             display: inline-block;
-            padding: 8px 20px;
+            padding: var(--spacing-xs) var(--spacing-lg);
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(10px);
-            border-radius: 50px;
+            border-radius: var(--radius-full);
             font-size: 0.85rem;
-            margin-bottom: 24px;
+            margin-bottom: var(--spacing-lg);
             border: 1px solid rgba(255,255,255,0.3);
         }
         .hero h1 {
             font-family: 'Noto Serif SC', serif;
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: var(--spacing-md);
             line-height: 1.2;
             text-shadow: 0 2px 20px rgba(0,0,0,0.2);
         }
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             opacity: 0.9;
-            margin-bottom: 40px;
+            margin-bottom: var(--spacing-xl);
             font-weight: 300;
         }
         .hero-cta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 14px 32px;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md) var(--spacing-xl);
             background: var(--secondary);
             color: white;
             text-decoration: none;
-            border-radius: 50px;
+            border-radius: var(--radius-full);
             font-weight: 600;
             font-size: 1rem;
             transition: var(--transition);
@@ -182,13 +248,13 @@
         }
         .scroll-indicator {
             position: absolute;
-            bottom: 40px;
+            bottom: var(--spacing-xl);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: var(--spacing-xs);
             color: rgba(255,255,255,0.7);
             font-size: 0.8rem;
             animation: bounce 2s infinite;
@@ -199,30 +265,182 @@
             40% { transform: translateX(-50%) translateY(-10px); }
             60% { transform: translateX(-50%) translateY(-5px); }
         }
+
+        /* ================================================
+           【前端开发】筛选器和搜索区域样式
+           功能要点：分类标签栏、搜索框、排序按钮、结果统计
+           ================================================ */
+        .filter-section {
+            padding: var(--spacing-lg) var(--spacing-md) 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 分类标签栏 - 移动端水平滚动 */
+        .filter-tabs {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-xs);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            flex-shrink: 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            min-height: 40px;
+        }
+        .filter-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .filter-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        /* 分类标签图标 */
+        .filter-tab[data-category="scenery"]::before { content: '🌿'; }
+        .filter-tab[data-category="building"]::before { content: '🏛️'; }
+        .filter-tab[data-category="landmark"]::before { content: '📍'; }
+        .filter-tab[data-category="art"]::before { content: '🎨'; }
+        .filter-tab[data-category="sports"]::before { content: '⚽'; }
+        .filter-tab[data-category="food"]::before { content: '🍜'; }
+        
+        /* 搜索框 */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: var(--spacing-md);
+        }
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) calc(var(--spacing-md) * 3);
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            transition: var(--transition);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(74,144,226,0.15);
+        }
+        .search-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+        }
+        
+        /* 排序选择器 */
+        .sort-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+        .sort-label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+        .sort-select {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* 结果统计 */
+        .results-info {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        /* ================================================
+           【UI设计师】打卡点网格和卡片样式
+           设计要点：卡片布局、hover效果、展开动画、移动端单列
+           ================================================ */
+        .spots-section {
+            padding: var(--spacing-lg) var(--spacing-md) calc(var(--spacing-xl) * 2);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
         .section-header {
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: var(--spacing-xl);
         }
         .section-header h2 {
             font-family: 'Noto Serif SC', serif;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             color: var(--text-main);
-            margin-bottom: 12px;
+            margin-bottom: var(--spacing-sm);
         }
         .section-header p {
             color: var(--text-sub);
             font-size: 1rem;
         }
-        .spots-section {
-            padding: 80px 24px;
-            max-width: 1200px;
-            margin: 0 auto;
+        
+        /* 分类装饰图 - AI生成 */
+        .category-illustration {
+            max-width: 100%;
+            margin: 0 auto var(--spacing-xl);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 8px 30px var(--shadow);
+            display: none;
         }
+        .category-illustration.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .category-illustration img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        /* 卡片网格 - 响应式布局 */
         .spots-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
         }
+        
+        /* 打卡点卡片 */
         .spot-card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -241,23 +459,27 @@
             transform: translateY(-8px);
             box-shadow: 0 12px 40px var(--shadow-hover);
         }
-        .spot-image {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            transition: var(--transition);
-        }
-        .spot-card:hover .spot-image { transform: scale(1.05); }
+        
+        /* 卡片图片区域 */
         .spot-image-wrapper {
             overflow: hidden;
             position: relative;
         }
+        .spot-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        .spot-card:hover .spot-image { transform: scale(1.05); }
+        
+        /* 评分标签 */
         .spot-rating {
             position: absolute;
-            top: 12px; right: 12px;
+            top: var(--spacing-sm); right: var(--spacing-sm);
             background: rgba(255,255,255,0.95);
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 6px var(--spacing-md);
+            border-radius: var(--radius-full);
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--secondary);
@@ -266,44 +488,104 @@
             gap: 4px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .spot-content { padding: 24px; }
+        
+        /* 【前端开发】点赞收藏按钮组 - 触摸友好设计 */
+        .card-actions {
+            position: absolute;
+            top: var(--spacing-sm);
+            left: var(--spacing-sm);
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.95);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        .action-btn.liked {
+            background: #FF6B6B;
+            color: white;
+        }
+        .action-btn.favorited {
+            background: #FFE66D;
+            color: #F39C12;
+        }
+        
+        /* 卡片内容区域 */
+        .spot-content { padding: var(--spacing-lg); }
         .spot-content h3 {
             font-family: 'Noto Serif SC', serif;
             font-size: 1.25rem;
-            margin-bottom: 8px;
+            margin-bottom: var(--spacing-xs);
             color: var(--text-main);
         }
         .spot-desc {
             color: var(--text-sub);
             font-size: 0.9rem;
             line-height: 1.6;
-            margin-bottom: 16px;
+            margin-bottom: var(--spacing-sm);
         }
+        
+        /* 卡片分类标签 */
+        .spot-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: var(--spacing-sm);
+        }
+        .category-tag {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: white;
+        }
+        .category-tag.scenery { background: var(--cat-scenery); }
+        .category-tag.building { background: var(--cat-building); }
+        .category-tag.landmark { background: var(--cat-landmark); }
+        .category-tag.art { background: var(--cat-art); }
+        .category-tag.sports { background: var(--cat-sports); }
+        .category-tag.food { background: var(--cat-food); }
+        
         .spot-features {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
         }
         .feature-tag {
             padding: 4px 10px;
-            background: rgba(74,144,226,0.1);
+            background: var(--primary-light);
             color: var(--primary);
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             font-size: 0.75rem;
             font-weight: 500;
         }
+        
+        /* 收起状态的元信息 */
         .spot-meta {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding-top: 16px;
+            gap: var(--spacing-sm);
+            padding-top: var(--spacing-md);
             border-top: 1px solid rgba(0,0,0,0.06);
         }
         .meta-item {
             display: flex;
             align-items: flex-start;
-            gap: 8px;
+            gap: var(--spacing-sm);
             font-size: 0.85rem;
             color: var(--text-sub);
         }
@@ -318,10 +600,87 @@
             color: var(--text-main);
             flex-shrink: 0;
         }
+        
+        /* ================================================
+           【前端开发】卡片展开详情样式
+           功能要点：展开收起动画、额外信息展示
+           ================================================ */
+        .spot-expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .spot-card.expanded .spot-expanded-content {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .expanded-tip {
+            background: linear-gradient(135deg, var(--primary-light), rgba(114,75,162,0.08));
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+            margin-top: var(--spacing-md);
+            border-left: 4px solid var(--primary);
+        }
+        .expanded-tip h4 {
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .expanded-tip p {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+        
+        /* 展开/收起指示器 */
+        .expand-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding-top: var(--spacing-sm);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .expand-indicator svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+        .spot-card.expanded .expand-indicator svg {
+            transform: rotate(180deg);
+        }
+        
+        /* ================================================
+           【UI设计师】无结果状态样式
+           ================================================ */
+        .no-results {
+            text-align: center;
+            padding: calc(var(--spacing-xl) * 2) var(--spacing-md);
+            color: var(--text-sub);
+        }
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+        }
+        .no-results h3 {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        /* ================================================
+           【UI设计师】页脚样式
+           ================================================ */
         .footer {
             background: var(--text-main);
             color: rgba(255,255,255,0.8);
-            padding: 48px 24px 24px;
+            padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
             text-align: center;
         }
         .footer-content {
@@ -330,38 +689,42 @@
         }
         .footer h3 {
             font-family: 'Noto Serif SC', serif;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: white;
-            margin-bottom: 16px;
+            margin-bottom: var(--spacing-sm);
         }
         .footer p {
-            font-size: 0.9rem;
-            margin-bottom: 24px;
+            font-size: 0.85rem;
+            margin-bottom: var(--spacing-lg);
         }
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin-bottom: 32px;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
             flex-wrap: wrap;
         }
         .footer-links a {
             color: rgba(255,255,255,0.7);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: var(--transition);
         }
         .footer-links a:hover { color: var(--secondary); }
         .footer-bottom {
-            padding-top: 24px;
+            padding-top: var(--spacing-md);
             border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.5);
         }
+        
+        /* ================================================
+           【前端开发】返回顶部按钮
+           ================================================ */
         .back-to-top {
             position: fixed;
-            bottom: 32px; right: 32px;
-            width: 48px; height: 48px;
+            bottom: var(--spacing-lg); right: var(--spacing-md);
+            width: 44px; height: 44px;
             background: var(--primary);
             color: white;
             border: none;
@@ -388,15 +751,72 @@
             box-shadow: 0 8px 30px rgba(74,144,226,0.5);
         }
         .back-to-top svg { width: 20px; height: 20px; }
-        @media (max-width: 1024px) {
+        
+        /* ================================================
+           【前端开发】加载状态样式
+           ================================================ */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: calc(var(--spacing-xl) * 2);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(74, 144, 226, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-md);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        /* ================================================
+           【UI设计师】响应式布局 - 平板及以上
+           ================================================ */
+        @media (min-width: 768px) {
+            html { font-size: 15px; }
+            .hero h1 { font-size: 3rem; }
+            .section-header h2 { font-size: 2.2rem; }
             .spots-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 24px;
+                gap: var(--spacing-lg);
+            }
+            .spot-image { height: 220px; }
+            .category-illustration img { height: 220px; }
+            .filter-tabs {
+                justify-content: center;
+                flex-wrap: wrap;
+                overflow-x: visible;
             }
         }
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .hero p { font-size: 1rem; }
+        
+        /* ================================================
+           【UI设计师】响应式布局 - 桌面端
+           ================================================ */
+        @media (min-width: 1024px) {
+            html { font-size: 16px; }
+            .hero h1 { font-size: 3.5rem; }
+            .spots-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--spacing-xl);
+            }
+            .spot-image { height: 240px; }
+            .category-illustration { max-width: 400px; }
+        }
+        
+        /* ================================================
+           【前端开发】移动端菜单样式
+           ================================================ */
+        @media (max-width: 767px) {
             .nav-links {
                 position: fixed;
                 top: 0; right: -100%;
@@ -405,8 +825,8 @@
                 height: 100vh;
                 background: white;
                 flex-direction: column;
-                padding: 80px 32px 32px;
-                gap: 24px;
+                padding: 80px var(--spacing-lg) var(--spacing-lg);
+                gap: var(--spacing-lg);
                 transition: var(--transition);
                 box-shadow: -5px 0 30px rgba(0,0,0,0.1);
             }
@@ -416,37 +836,13 @@
                 font-size: 1.1rem;
             }
             .menu-toggle { display: flex; }
-            .spots-grid {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-            .spots-section { padding: 60px 16px; }
-            .section-header h2 { font-size: 1.8rem; }
-            .back-to-top {
-                bottom: 20px; right: 20px;
-                width: 44px; height: 44px;
-            }
         }
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 1.8rem; }
-            .hero-badge {
-                font-size: 0.75rem;
-                padding: 6px 14px;
-            }
-            .spot-content { padding: 20px; }
-            .spot-image { height: 180px; }
-        }
-        .spot-card:nth-child(1) { transition-delay: 0.05s; }
-        .spot-card:nth-child(2) { transition-delay: 0.1s; }
-        .spot-card:nth-child(3) { transition-delay: 0.15s; }
-        .spot-card:nth-child(4) { transition-delay: 0.2s; }
-        .spot-card:nth-child(5) { transition-delay: 0.25s; }
-        .spot-card:nth-child(6) { transition-delay: 0.3s; }
-        .spot-card:nth-child(7) { transition-delay: 0.35s; }
-        .spot-card:nth-child(8) { transition-delay: 0.4s; }
     </style>
 </head>
 <body>
+    <!-- ================================================
+         【前端开发】导航栏组件
+         ================================================ -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#" class="logo">
@@ -465,6 +861,10 @@
             </div>
         </div>
     </nav>
+
+    <!-- ================================================
+         【UI设计师】Hero区域组件
+         ================================================ -->
     <section class="hero" id="home">
         <div class="hero-content">
             <div class="hero-badge">📸 探索校园最美角落</div>
@@ -484,13 +884,58 @@
             </svg>
         </div>
     </section>
-    <section class="spots-section" id="spots">
+
+    <!-- ================================================
+         【前端开发】筛选和搜索区域组件
+         ================================================ -->
+    <div class="filter-section" id="spots">
+        <!-- 分类标签栏 -->
+        <div class="filter-tabs" id="filterTabs"></div>
+        
+        <!-- 搜索框 -->
+        <div class="search-wrapper">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" 
+                   class="search-input" 
+                   id="searchInput" 
+                   placeholder="搜索打卡点名称或关键词...">
+        </div>
+        
+        <!-- 排序选择器 -->
+        <div class="sort-wrapper">
+            <span class="sort-label">排序：</span>
+            <select class="sort-select" id="sortSelect">
+                <option value="default">默认推荐</option>
+                <option value="rating">评分最高</option>
+                <option value="name">名称排序</option>
+                <option value="time">推荐时间</option>
+            </select>
+        </div>
+        
+        <!-- 分类装饰图 -->
+        <div class="category-illustration" id="categoryIllustration"></div>
+        
+        <!-- 结果统计 -->
+        <div class="results-info" id="resultsInfo">共 8 个打卡点</div>
+    </div>
+
+    <!-- ================================================
+         【前端开发】打卡点网格组件
+         ================================================ -->
+    <section class="spots-section">
         <div class="section-header">
             <h2>精选打卡点</h2>
             <p>8个校园必去圣地，每一个都值得你驻足留念</p>
         </div>
         <div class="spots-grid" id="spotsGrid"></div>
     </section>
+
+    <!-- ================================================
+         【UI设计师】页脚组件
+         ================================================ -->
     <footer class="footer" id="about">
         <div class="footer-content">
             <h3>校园打卡指南</h3>
@@ -502,150 +947,526 @@
                 <a href="#">隐私政策</a>
             </div>
             <div class="footer-bottom">
-                <p> 校园打卡指南. All rights reserved. Made with ❤️ for students.</p>
+                <p>© 2024 校园打卡指南. All rights reserved. Made with ❤️ for students.</p>
             </div>
         </div>
     </footer>
+
+    <!-- 返回顶部按钮 -->
     <button class="back-to-top" id="backToTop" aria-label="返回顶部">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 19V5M5 12l7-7 7 7"/>
         </svg>
     </button>
+
     <script>
+        // ================================================
+        // 【前端开发】打卡点数据模型
+        // 包含8个校园打卡点的完整信息，每个点有分类标签、评分、推荐时间等
+        // ================================================
         const spots = [
             {
                 id: 1,
                 name: '图书馆穹顶',
                 desc: '校园最具标志性的建筑，穹顶设计融合古典与现代，是毕业照必拍圣地',
+                categories: ['scenery', 'building', 'landmark'],
                 features: ['欧式穹顶', '玻璃天窗', '旋转楼梯'],
                 rating: 5,
                 time: '日落前1小时（17:00-18:30）',
-                tip: '仰拍穹顶全貌，或站在旋转楼梯上拍剪影',
+                tip: '仰拍穹顶全貌，或站在旋转楼梯上拍剪影。建议使用广角镜头，展现建筑的宏伟气势。夕阳时分的金色阳光透过玻璃穹顶洒入，营造出神圣的氛围。',
                 location: '校园中轴线上，正门进入直行200米',
-                image: 'https://picsum.photos/seed/library/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=university%20library%20dome%20interior%2C%20classical%20european%20architecture%2C%20glass%20skylight%2C%20spiral%20staircase%2C%20warm%20sunlight&image_size=square_hd'
             },
             {
                 id: 2,
                 name: '樱花大道',
                 desc: '春季校园最浪漫的打卡地，数百株樱花沿主干道两侧盛开',
+                categories: ['scenery', 'landmark'],
                 features: ['樱花隧道', '花瓣雨', '春日野餐'],
                 rating: 5,
                 time: '3月下旬-4月上旬，早晨7:00-9:00',
-                tip: '低角度仰拍花隧道，或带野餐垫拍氛围感照片',
+                tip: '低角度仰拍花隧道，或带野餐垫拍氛围感照片。建议穿浅色衣服与粉色樱花形成对比，花瓣飘落时连拍捕捉动态美感。',
                 location: '从东门到教学区的主干道',
-                image: 'https://picsum.photos/seed/cherry/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cherry%20blossom%20avenue%20on%20campus%2C%20spring%20flowers%2C%20petal%20rain%2C%20romantic%20atmosphere%2C%20students%20taking%20photos&image_size=square_hd'
             },
             {
                 id: 3,
                 name: '老校门',
                 desc: '建校时期的原校门，承载几代学子的记忆',
+                categories: ['landmark', 'art'],
                 features: ['历史建筑', '石刻校名', '怀旧氛围'],
                 rating: 4,
                 time: '全天皆宜，雨天更有复古韵味',
-                tip: '正面全景或透过门框拍景深效果',
+                tip: '正面全景或透过门框拍景深效果。雨后的校门更有历史厚重感，青砖上的水珠增添质感。',
                 location: '校园西南角，原校址入口处',
-                image: 'https://picsum.photos/seed/gate/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=vintage%20university%20gate%2C%20historical%20architecture%2C%20stone%20carving%2C%20nostalgic%20atmosphere%2C%20rainy%20day&image_size=square_hd'
             },
             {
                 id: 4,
                 name: '湖畔长椅',
                 desc: '校园人工湖边的木质长椅，背景是湖心亭与垂柳',
+                categories: ['scenery', 'landmark'],
                 features: ['湖景倒影', '垂柳依依', '静谧氛围'],
                 rating: 4,
                 time: '傍晚17:30-18:30，湖面倒映晚霞',
-                tip: '侧坐长椅拍剪影，或拍湖面倒影对称构图',
+                tip: '侧坐长椅拍剪影，或拍湖面倒影对称构图。日落时分的湖面金光闪闪，是拍摄剪影的最佳时机。',
                 location: '图书馆北侧，沿湖步道中段',
-                image: 'https://picsum.photos/seed/lake/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wooden%20bench%20by%20lake%20on%20campus%2C%20willow%20trees%2C%20sunset%20reflection%2C%20peaceful%20atmosphere&image_size=square_hd'
             },
             {
                 id: 5,
                 name: '钟楼广场',
                 desc: '校园中心地标，整点报时的钟声回荡校园',
+                categories: ['building', 'landmark'],
                 features: ['哥特式钟楼', '鸽群', '广场喷泉'],
                 rating: 5,
                 time: '整点报时刻，或夜晚亮灯后',
-                tip: '广角拍钟楼全貌，或蹲低角度拍鸽群环绕',
+                tip: '广角拍钟楼全貌，或蹲低角度拍鸽群环绕。夜晚灯光下的钟楼更显神秘庄重，长曝光拍摄喷泉增添动感。',
                 location: '校园几何中心，各主干道交汇点',
-                image: 'https://picsum.photos/seed/clocktower/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=gothic%20clock%20tower%20on%20campus%20square%2C%20pigeons%20flying%2C%20fountain%2C%20evening%20lighting&image_size=square_hd'
             },
             {
                 id: 6,
                 name: '涂鸦隧道',
                 desc: '连接教学区与宿舍区的地下隧道，两侧墙壁布满学生创作的涂鸦作品',
+                categories: ['art', 'landmark'],
                 features: ['街头艺术', '学生创作', '色彩冲击'],
                 rating: 4,
                 time: '白天（隧道内光线较暗，需自然光）',
-                tip: '与涂鸦互动拍pose，或拍隧道纵深感',
+                tip: '与涂鸦互动拍pose，或拍隧道纵深感。鲜艳的色彩适合人像拍摄，建议穿纯色衣服突出人物。',
                 location: '第三教学楼与西区宿舍之间',
-                image: 'https://picsum.photos/seed/graffiti/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=graffiti%20tunnel%20underground%2C%20street%20art%2C%20colorful%20murals%2C%20student%20creations%2C%20urban%20style&image_size=square_hd'
             },
             {
                 id: 7,
                 name: '操场看台',
                 desc: '红色塑胶跑道旁的阶梯看台，青春校园剧的标配场景',
+                categories: ['sports', 'landmark'],
                 features: ['红色跑道', '阶梯线条', '青春感'],
                 rating: 3,
                 time: '黄昏18:00-19:00，看台被夕阳染成金色',
-                tip: '利用阶梯线条拍纵深感，或坐在看台边缘拍逆光',
+                tip: '利用阶梯线条拍纵深感，或坐在看台边缘拍逆光。运动服或校服更能体现青春活力，跳跃抓拍动感瞬间。',
                 location: '东区运动场北侧看台',
-                image: 'https://picsum.photos/seed/stadium/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=school%20sports%20stadium%20bleachers%2C%20red%20running%20track%2C%20golden%20sunset%2C%20youth%20sports%20atmosphere&image_size=square_hd'
             },
             {
                 id: 8,
                 name: '食堂二楼露台',
                 desc: '学生食堂二楼的露天就餐区，可俯瞰校园中轴线',
+                categories: ['food', 'scenery'],
                 features: ['俯瞰视角', '校园全景', '生活气息'],
                 rating: 4,
                 time: '午餐后12:30-13:30',
-                tip: '拍校园中轴线全景，或以食物为前景拍窗外',
+                tip: '拍校园中轴线全景，或以食物为前景拍窗外。建议在饭点拍摄，捕捉校园生活气息，美食与美景兼得。',
                 location: '第一食堂二楼南侧露台',
-                image: 'https://picsum.photos/seed/cafeteria/800/600'
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cafeteria%20terrace%20overlooking%20campus%2C%20food%20on%20table%2C%20panoramic%20view%2C%20student%20life&image_size=square_hd'
             }
         ];
+
+        // ================================================
+        // 【前端开发】全局状态管理
+        // 管理筛选、搜索、排序、点赞收藏等状态
+        // ================================================
+        const state = {
+            activeCategories: [],
+            searchQuery: '',
+            sortBy: 'default',
+            likes: {},
+            favorites: [],
+            expandedCardId: null
+        };
+
+        // localStorage keys
+        const STORAGE_KEYS = {
+            LIKES: 'campus_checkin_likes',
+            FAVORITES: 'campus_checkin_favorites'
+        };
+
+        // ================================================
+        // 【UI设计师】分类标签定义
+        // 6个分类：风景、建筑、地标、文艺、运动、美食
+        // ================================================
+        const CATEGORIES = [
+            { id: 'scenery', name: '风景' },
+            { id: 'building', name: '建筑' },
+            { id: 'landmark', name: '地标' },
+            { id: 'art', name: '文艺' },
+            { id: 'sports', name: '运动' },
+            { id: 'food', name: '美食' }
+        ];
+
+        // AI生成的分类装饰图映射
+        const CATEGORY_IMAGES = {
+            scenery: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20campus%20scenery%2C%20cherry%20blossoms%2C%20lake%2C%20green%20trees%2C%20spring%20season&image_size=landscape_4_3',
+            building: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20university%20building%2C%20library%20dome%2C%20architectural%20detail%2C%20sunlight&image_size=landscape_4_3',
+            landmark: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=campus%20landmark%20clock%20tower%2C%20iconic%20building%2C%20evening%20light&image_size=landscape_4_3',
+            art: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=graffiti%20art%20on%20campus%2C%20colorful%20murals%2C%20creative%20expression&image_size=landscape_4_3',
+            sports: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sports%20field%20on%20campus%2C%20running%20track%2C%20athletic%20facilities&image_size=landscape_4_3',
+            food: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=campus%20cafeteria%2C%20delicious%20food%2C%20student%20dining%2C%20cozy%20atmosphere&image_size=landscape_4_3'
+        };
+
+        // ================================================
+        // 【前端开发】工具函数
+        // ================================================
+
+        /**
+         * 从localStorage加载用户数据（点赞和收藏）
+         */
+        function loadUserData() {
+            try {
+                const savedLikes = localStorage.getItem(STORAGE_KEYS.LIKES);
+                if (savedLikes) {
+                    state.likes = JSON.parse(savedLikes);
+                }
+                const savedFavorites = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+                if (savedFavorites) {
+                    state.favorites = JSON.parse(savedFavorites);
+                }
+            } catch (e) {
+                console.warn('加载用户数据失败:', e);
+            }
+        }
+
+        /**
+         * 保存用户数据到localStorage
+         */
+        function saveUserData() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.LIKES, JSON.stringify(state.likes));
+                localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(state.favorites));
+            } catch (e) {
+                console.warn('保存用户数据失败:', e);
+            }
+        }
+
+        /**
+         * 过滤和排序打卡点列表
+         * 【前端开发】实现搜索、筛选、排序的组合逻辑
+         */
+        function filterAndSortSpots() {
+            let filtered = [...spots];
+            
+            // 分类筛选：匹配任一选中分类
+            if (state.activeCategories.length > 0) {
+                filtered = filtered.filter(spot => 
+                    state.activeCategories.some(cat => spot.categories.includes(cat))
+                );
+            }
+            
+            // 搜索筛选：匹配名称、描述或特点
+            const query = state.searchQuery.toLowerCase().trim();
+            if (query) {
+                filtered = filtered.filter(spot => 
+                    spot.name.toLowerCase().includes(query) || 
+                    spot.desc.toLowerCase().includes(query) ||
+                    spot.features.some(f => f.toLowerCase().includes(query))
+                );
+            }
+            
+            // 排序逻辑
+            switch (state.sortBy) {
+                case 'rating':
+                    filtered.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'name':
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+                    break;
+                case 'time':
+                    // 按推荐时间排序（简单实现）
+                    filtered.sort((a, b) => a.time.localeCompare(b.time));
+                    break;
+                default:
+                    // 默认排序保持原有顺序
+                    break;
+            }
+            
+            return filtered;
+        }
+
+        // ================================================
+        // 【前端开发】渲染函数
+        // ================================================
+
+        /**
+         * 渲染分类标签栏
+         */
+        function renderFilterTabs() {
+            const container = document.getElementById('filterTabs');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <button class="filter-tab ${state.activeCategories.length === 0 ? 'active' : ''}" 
+                        data-category="all">
+                    全部
+                </button>
+                ${CATEGORIES.map(cat => `
+                    <button class="filter-tab ${state.activeCategories.includes(cat.id) ? 'active' : ''}" 
+                            data-category="${cat.id}">
+                        ${cat.name}
+                    </button>
+                `).join('')}
+            `;
+            
+            // 绑定点击事件
+            container.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', handleFilterClick);
+            });
+        }
+
+        /**
+         * 渲染分类装饰图
+         */
+        function renderCategoryIllustration() {
+            const container = document.getElementById('categoryIllustration');
+            if (!container) return;
+            
+            const firstActiveCat = state.activeCategories[0];
+            const imageUrl = firstActiveCat ? CATEGORY_IMAGES[firstActiveCat] : null;
+            
+            if (imageUrl) {
+                container.innerHTML = `<img src="${imageUrl}" alt="${CATEGORIES.find(c => c.id === firstActiveCat)?.name}装饰图" loading="lazy">`;
+                container.classList.add('visible');
+            } else {
+                container.classList.remove('visible');
+            }
+        }
+
+        /**
+         * 渲染打卡点卡片
+         * 【UI设计师】卡片布局设计，包含图片、评分、分类标签、操作按钮
+         */
         function renderCards() {
             const grid = document.getElementById('spotsGrid');
-            grid.innerHTML = spots.map(spot => `
-                <article class="spot-card" data-id="${spot.id}">
-                    <div class="spot-image-wrapper">
-                        <img src="${spot.image}" alt="${spot.name}" class="spot-image" loading="lazy">
-                        <div class="spot-rating">
-                            <span>${'★'.repeat(spot.rating)}${'☆'.repeat(5 - spot.rating)}</span>
-                            <span>${spot.rating}星</span>
-                        </div>
+            if (!grid) return;
+            
+            const filteredSpots = filterAndSortSpots();
+            
+            // 更新结果统计
+            const resultsInfo = document.getElementById('resultsInfo');
+            if (resultsInfo) {
+                resultsInfo.textContent = `共 ${filteredSpots.length} 个打卡点`;
+            }
+            
+            // 无结果显示
+            if (filteredSpots.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>没有找到匹配的打卡点</h3>
+                        <p>试试调整筛选条件或搜索关键词</p>
                     </div>
-                    <div class="spot-content">
-                        <h3>${spot.name}</h3>
-                        <p class="spot-desc">${spot.desc}</p>
-                        <div class="spot-features">
-                            ${spot.features.map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                `;
+                return;
+            }
+            
+            // 渲染卡片
+            grid.innerHTML = filteredSpots.map(spot => {
+                const isLiked = state.likes[spot.id] || false;
+                const isFavorited = state.favorites.includes(spot.id);
+                const isExpanded = state.expandedCardId === spot.id;
+                
+                return `
+                    <article class="spot-card ${isExpanded ? 'expanded' : ''}" data-id="${spot.id}">
+                        <div class="spot-image-wrapper">
+                            <img src="${spot.image}" alt="${spot.name}" class="spot-image" loading="lazy">
+                            <div class="spot-rating">
+                                <span>${'★'.repeat(spot.rating)}${'☆'.repeat(5 - spot.rating)}</span>
+                                <span>${spot.rating}星</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="action-btn like-btn ${isLiked ? 'liked' : ''}" 
+                                        data-id="${spot.id}" 
+                                        aria-label="点赞">
+                                    ${isLiked ? '❤️' : '🤍'}
+                                </button>
+                                <button class="action-btn favorite-btn ${isFavorited ? 'favorited' : ''}" 
+                                        data-id="${spot.id}" 
+                                        aria-label="收藏">
+                                    ${isFavorited ? '⭐' : '☆'}
+                                </button>
+                            </div>
                         </div>
-                        <div class="spot-meta">
-                            <div class="meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M12 6v6l4 2"/>
-                                </svg>
-                                <span><span class="meta-label">推荐时间：</span>${spot.time}</span>
+                        <div class="spot-content">
+                            <h3>${spot.name}</h3>
+                            <p class="spot-desc">${spot.desc}</p>
+                            <div class="spot-categories">
+                                ${spot.categories.map(cat => {
+                                    const catInfo = CATEGORIES.find(c => c.id === cat);
+                                    return catInfo ? 
+                                        `<span class="category-tag ${cat}">${catInfo.name}</span>` : '';
+                                }).join('')}
                             </div>
-                            <div class="meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                                    <circle cx="12" cy="13" r="4"/>
-                                </svg>
-                                <span><span class="meta-label">拍摄建议：</span>${spot.tip}</span>
+                            <div class="spot-features">
+                                ${spot.features.map(f => `<span class="feature-tag">${f}</span>`).join('')}
                             </div>
-                            <div class="meta-item">
+                            <div class="spot-meta">
+                                <div class="meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                    <span><span class="meta-label">推荐时间：</span>${spot.time}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                        <circle cx="12" cy="13" r="4"/>
+                                    </svg>
+                                    <span><span class="meta-label">位置：</span>${spot.location}</span>
+                                </div>
+                            </div>
+                            <div class="spot-expanded-content">
+                                <div class="expanded-tip">
+                                    <h4>💡 摄影师建议</h4>
+                                    <p>${spot.tip}</p>
+                                </div>
+                            </div>
+                            <div class="expand-indicator">
+                                <span>${isExpanded ? '收起详情' : '展开详情'}</span>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                                    <circle cx="12" cy="10" r="3"/>
+                                    <path d="M6 9l6 6 6-6"/>
                                 </svg>
-                                <span><span class="meta-label">位置：</span>${spot.location}</span>
                             </div>
                         </div>
-                    </div>
-                </article>
-            `).join('');
+                    </article>
+                `;
+            }).join('');
+            
+            // 绑定卡片事件
+            bindCardEvents();
+            
+            // 重新初始化滚动动画观察器
+            initScrollAnimations();
         }
+
+        /**
+         * 绑定卡片相关事件
+         */
+        function bindCardEvents() {
+            // 点赞按钮
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', handleLikeClick);
+            });
+            
+            // 收藏按钮
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', handleFavoriteClick);
+            });
+            
+            // 卡片点击（展开/收起）
+            document.querySelectorAll('.spot-card').forEach(card => {
+                card.addEventListener('click', handleCardClick);
+            });
+        }
+
+        // ================================================
+        // 【前端开发】事件处理函数
+        // ================================================
+
+        /**
+         * 处理分类标签点击
+         */
+        function handleFilterClick(e) {
+            const category = e.target.dataset.category;
+            
+            if (category === 'all') {
+                state.activeCategories = [];
+            } else {
+                const index = state.activeCategories.indexOf(category);
+                if (index > -1) {
+                    state.activeCategories.splice(index, 1);
+                } else {
+                    state.activeCategories.push(category);
+                }
+            }
+            
+            renderFilterTabs();
+            renderCategoryIllustration();
+            renderCards();
+        }
+
+        /**
+         * 处理搜索输入（带防抖）
+         */
+        let searchDebounceTimer;
+        function handleSearchInput(e) {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                state.searchQuery = e.target.value;
+                renderCards();
+            }, 300);
+        }
+
+        /**
+         * 处理排序选择
+         */
+        function handleSortChange(e) {
+            state.sortBy = e.target.value;
+            renderCards();
+        }
+
+        /**
+         * 处理点赞按钮点击
+         */
+        function handleLikeClick(e) {
+            e.stopPropagation();
+            const id = parseInt(e.currentTarget.dataset.id);
+            
+            // 切换点赞状态
+            state.likes[id] = !state.likes[id];
+            saveUserData();
+            
+            // 更新按钮UI
+            const btn = e.currentTarget;
+            btn.classList.toggle('liked');
+            btn.innerHTML = state.likes[id] ? '❤️' : '🤍';
+        }
+
+        /**
+         * 处理收藏按钮点击
+         */
+        function handleFavoriteClick(e) {
+            e.stopPropagation();
+            const id = parseInt(e.currentTarget.dataset.id);
+            
+            // 切换收藏状态
+            const index = state.favorites.indexOf(id);
+            if (index > -1) {
+                state.favorites.splice(index, 1);
+            } else {
+                state.favorites.push(id);
+            }
+            saveUserData();
+            
+            // 更新按钮UI
+            const btn = e.currentTarget;
+            btn.classList.toggle('favorited');
+            btn.innerHTML = state.favorites.includes(id) ? '⭐' : '☆';
+        }
+
+        /**
+         * 处理卡片点击（展开/收起）
+         */
+        function handleCardClick(e) {
+            // 如果点击的是按钮，不触发卡片展开
+            if (e.target.closest('.action-btn')) return;
+            
+            const card = e.currentTarget;
+            const id = parseInt(card.dataset.id);
+            
+            // 切换展开状态
+            state.expandedCardId = state.expandedCardId === id ? null : id;
+            renderCards();
+        }
+
+        // ================================================
+        // 【前端开发】初始化函数
+        // ================================================
+
+        /**
+         * 初始化滚动动画（IntersectionObserver）
+         * 【UI设计师】实现卡片滚动淡入效果
+         */
         function initScrollAnimations() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -657,28 +1478,39 @@
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
             });
+            
             document.querySelectorAll('.spot-card').forEach(card => {
                 observer.observe(card);
             });
         }
+
+        /**
+         * 初始化导航栏滚动效果
+         */
         function initNavbar() {
             const navbar = document.getElementById('navbar');
+            if (!navbar) return;
+            
             window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
+                navbar.classList.toggle('scrolled', window.pageYOffset > 50);
             });
         }
+
+        /**
+         * 初始化移动端菜单
+         */
         function initMobileMenu() {
             const menuToggle = document.getElementById('menuToggle');
             const navLinks = document.getElementById('navLinks');
+            
+            if (!menuToggle || !navLinks) return;
+            
             menuToggle.addEventListener('click', () => {
                 menuToggle.classList.toggle('active');
                 navLinks.classList.toggle('active');
                 document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
             });
+            
             navLinks.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', () => {
                     menuToggle.classList.remove('active');
@@ -687,25 +1519,62 @@
                 });
             });
         }
+
+        /**
+         * 初始化返回顶部按钮
+         */
         function initBackToTop() {
             const btn = document.getElementById('backToTop');
+            if (!btn) return;
+            
             window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 500) {
-                    btn.classList.add('visible');
-                } else {
-                    btn.classList.remove('visible');
-                }
+                btn.classList.toggle('visible', window.pageYOffset > 500);
             });
+            
             btn.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
+
+        /**
+         * 初始化搜索框
+         */
+        function initSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput) return;
+            
+            searchInput.addEventListener('input', handleSearchInput);
+        }
+
+        /**
+         * 初始化排序选择器
+         */
+        function initSort() {
+            const sortSelect = document.getElementById('sortSelect');
+            if (!sortSelect) return;
+            
+            sortSelect.addEventListener('change', handleSortChange);
+        }
+
+        // ================================================
+        // 【前端开发】DOM加载完成后初始化
+        // ================================================
         document.addEventListener('DOMContentLoaded', () => {
+            // 加载用户数据（点赞收藏）
+            loadUserData();
+            
+            // 渲染初始UI
+            renderFilterTabs();
+            renderCategoryIllustration();
             renderCards();
+            
+            // 初始化各模块
             initScrollAnimations();
             initNavbar();
             initMobileMenu();
             initBackToTop();
+            initSearch();
+            initSort();
         });
     </script>
 </body>
